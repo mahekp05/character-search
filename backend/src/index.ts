@@ -23,12 +23,29 @@ app.get("/", (_req, res) => {
   res.send("Backend is running");
 });
 
-app.get("/api/characters", async (_req, res) => {
-  const characters = await prisma.character.findMany({
+app.get("/api/products", async (_req, res) => {
+  const products = await prisma.product.findMany({
     orderBy: { id: "asc" },
   });
 
-  res.json(characters);
+  res.json(products);
+});
+
+app.get("/api/products/search", async (req, res) => {
+  const q = String(req.query.q || "");
+
+  const products = await prisma.product.findMany({
+    where: {
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { brand: { contains: q, mode: "insensitive" } },
+        { category: { contains: q, mode: "insensitive" } },
+        { color: { contains: q, mode: "insensitive" } },
+      ],
+    },
+  });
+
+  res.json(products);
 });
 
 app.listen(5000, () => {

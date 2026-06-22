@@ -13,33 +13,34 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  await prisma.character.createMany({
+  await prisma.product.deleteMany();
+
+  await prisma.product.createMany({
     data: [
       {
-        name: "Hermione Granger",
-        sourceTitle: "Harry Potter",
-        sourceType: "Book/Movie",
-        description:
-          "An intelligent, ambitious, loyal overachiever who values knowledge and justice.",
+        name: "Black Mini Dress",
+        brand: "Zara",
+        category: "Dress",
+        color: "Black",
+        price: 59.99,
+        imageUrl: "https://example.com/dress.jpg",
+        description: "Simple black dress for going out or dinner.",
+        tags: ["black", "dress", "minimal", "party"],
       },
       {
-        name: "Leslie Knope",
-        sourceTitle: "Parks and Recreation",
-        sourceType: "TV Show",
-        description:
-          "An optimistic, driven, chaotic-good leader who cares deeply about her community.",
-      },
-      {
-        name: "Mr. Darcy",
-        sourceTitle: "Pride and Prejudice",
-        sourceType: "Book/Movie",
-        description:
-          "A reserved, emotionally guarded romantic lead with strong principles.",
+        name: "White Button Down Shirt",
+        brand: "H&M",
+        category: "Top",
+        color: "White",
+        price: 24.99,
+        imageUrl: "https://example.com/shirt.jpg",
+        description: "Clean basic shirt for school, internships, or casual outfits.",
+        tags: ["white", "shirt", "workwear", "basic"],
       },
     ],
   });
 
-  console.log("Seeded characters");
+  console.log("Seeded products");
 }
 
 main()

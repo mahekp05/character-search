@@ -11,12 +11,14 @@ datasource db {
   provider = "postgresql"
 }
 
-model Character {
-  id          Int      @id @default(autoincrement())
+model Product {
+  id          String @id @default(uuid())
   name        String
-  sourceTitle String
-  sourceType  String
-  description String
-
-  createdAt   DateTime @default(now())
+  brand       String?
+  category    String?
+  color       String?
+  price       Float?
+  imageUrl    String?
+  description String?
+  tags        String[]
 }
