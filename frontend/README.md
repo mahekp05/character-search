@@ -1,19 +1,20 @@
-# Character Search
+# Product Search
 
-A full-stack search application for discovering fictional characters based on personality traits, descriptions, and keywords.
+A full-stack product search application for browsing and discovering products by name, brand, category, color, price, description, and tags.
 
 ## Overview
 
-Character Search allows users to explore characters from books, movies, television shows, and other media through a searchable database. Rather than searching only by name, users can discover characters using personality traits, behaviors, and descriptive keywords.
+Product Search allows users to explore a searchable product database through simple keywords and filters. Instead of searching only by exact product name, users can discover products using descriptive terms, styles, colors, brands, or categories.
 
 Examples:
 
-* "ambitious"
-* "bookish"
-* "emotionally guarded"
-* "optimistic leader"
+* "black dress"
+* "Zara"
+* "summer tops"
+* "under 50"
+* "minimal neutral basics"
 
-The project is being built to explore full-stack application development, database design, search systems, and information retrieval.
+This project is being built to explore full-stack application development, database design, search systems, product discovery, and recommendation-style features.
 
 ## Tech Stack
 
@@ -35,20 +36,36 @@ The project is being built to explore full-stack application development, databa
 * PostgreSQL
 * Prisma ORM
 
+## Database Model
+
+```prisma
+model Product {
+  id          String @id @default(uuid())
+  name        String
+  brand       String?
+  category    String?
+  color       String?
+  price       Float?
+  imageUrl    String?
+  description String?
+  tags        String[]
+}
+```
+
 ## Current Features
 
 * PostgreSQL database integration
 * Prisma ORM configuration
-* Character data model
+* Product data model
 * Database migrations
-* Seeded character dataset
-* REST API endpoint for retrieving characters
+* Seeded product dataset
+* REST API endpoint for retrieving products
 * Full-stack architecture connecting frontend, backend, and database
 
 ## Project Structure
 
 ```text
-character-search/
+product-search/
 ├── frontend/
 │   ├── app/
 │   ├── components/
@@ -64,10 +81,10 @@ character-search/
 
 ## API
 
-### Get All Characters
+### Get All Products
 
 ```http
-GET /api/characters
+GET /api/products
 ```
 
 Response:
@@ -75,25 +92,56 @@ Response:
 ```json
 [
   {
-    "id": 1,
-    "name": "Hermione Granger",
-    "sourceTitle": "Harry Potter",
-    "sourceType": "Book/Movie",
-    "description": "An intelligent, ambitious, loyal overachiever who values knowledge and justice."
+    "id": "16ff2619-fb06-413f-aeed-5b700d076323",
+    "name": "Black Mini Dress",
+    "brand": "Zara",
+    "category": "Dress",
+    "color": "Black",
+    "price": 59.99,
+    "imageUrl": "https://example.com/dress.jpg",
+    "description": "Simple black mini dress for casual and going-out looks.",
+    "tags": ["black", "dress", "mini", "zara", "going-out"]
+  }
+]
+```
+
+### Search Products
+
+```http
+GET /api/products/search?q=dress
+```
+
+Response:
+
+```json
+[
+  {
+    "id": "16ff2619-fb06-413f-aeed-5b700d076323",
+    "name": "Black Mini Dress",
+    "brand": "Zara",
+    "category": "Dress",
+    "color": "Black",
+    "price": 59.99,
+    "imageUrl": "https://example.com/dress.jpg",
+    "description": "Simple black mini dress for casual and going-out looks.",
+    "tags": ["black", "dress", "mini", "zara", "going-out"]
   }
 ]
 ```
 
 ## Planned Features
 
-* Keyword-based character search
-* Trait filtering
-* Character detail pages
-* Character relationships
-* Advanced search ranking
-* Search analytics
+* Keyword-based product search
+* Category filtering
+* Brand filtering
+* Color filtering
+* Price range filtering
+* Product detail pages
+* Saved or favorited products
+* Similar product recommendations
+* Search ranking improvements
 * Semantic search
-* Character recommendations
+* Personalized product discovery
 
 ## Getting Started
 
@@ -129,4 +177,6 @@ npx ts-node prisma/seed.ts
 
 ## Motivation
 
-Most search applications focus on finding known items. This project explores character discovery by allowing users to search for fictional characters through descriptive traits, personalities, and behaviors, creating a more exploratory search experience.
+Most shopping websites are built around known-item search, where users already know what they want. This project explores product discovery by allowing users to search through descriptions, tags, brands, colors, and categories, making the experience more flexible and exploratory.
+
+The long-term goal is to turn this into a more intelligent product search and recommendation system that helps users discover fashion items based on style, preferences, budget, and context.
