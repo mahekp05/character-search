@@ -10,14 +10,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
-
 model Product {
   id          String @id @default(uuid())
   name        String
   brand       String?
   category    String?
   color       String?
+  size        String?
   price       Float?
+  rating      Float?
   imageUrl    String?
   description String?
   tags        String[]

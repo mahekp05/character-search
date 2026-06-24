@@ -70,7 +70,8 @@ app.get("/api/products/search", async (req, res) => {
 // NOTE: must also be declared BEFORE "/api/products/:id".
 app.get("/api/products/filter", async (req, res) => {
   try {
-    const { category, color, brand, minPrice, maxPrice } = req.query;
+    const { category, color, brand, size, minPrice, maxPrice, minRating } =
+      req.query;
 
     // Build the "where" object step by step, only adding filters
     // for the params the user actually sent.
@@ -88,6 +89,10 @@ app.get("/api/products/filter", async (req, res) => {
       where.brand = { equals: String(brand), mode: "insensitive" };
     }
 
+    if (size) {
+      where.size = { equals: String(size), mode: "insensitive" };
+    }
+
     // Price range: combine minPrice and maxPrice into one "price" filter.
     if (minPrice || maxPrice) {
       where.price = {};
@@ -99,6 +104,11 @@ app.get("/api/products/filter", async (req, res) => {
       if (maxPrice) {
         where.price.lte = Number(maxPrice);
       }
+    }
+
+    // Minimum rating: keep products rated at least this high (e.g. 4 = "4+").
+    if (minRating) {
+      where.rating = { gte: Number(minRating) };
     }
 
     const products = await prisma.product.findMany({
