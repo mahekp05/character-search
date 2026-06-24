@@ -18,6 +18,20 @@ function isRealImage(url?: string | null) {
   return !url.includes("example.com");
 }
 
+const placeholderImages: Record<string, string> = {
+  Dress: "/placeholders/dress.png",
+  Shoes: "/placeholders/shoes.png",
+  "T-shirt": "/placeholders/tshirt.png",
+  Jeans: "/placeholders/jeans.png",
+  Sweater: "/placeholders/sweater.png",
+};
+
+function getProductImage(product: Product) {
+  if (isRealImage(product.imageUrl)) return product.imageUrl as string;
+
+  return placeholderImages[product.name] || "/placeholders/default.png";
+}
+
 export default function ProductCard({ product }: { product: Product }) {
   return (
     <Link
@@ -25,23 +39,14 @@ export default function ProductCard({ product }: { product: Product }) {
       className="group block overflow-hidden rounded-2xl bg-warm-cream shadow-sm shadow-taupe/20 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-dusty-rose/30"
     >
       {/* Large image area (square) */}
-      <div className="relative aspect-square overflow-hidden bg-pearl-beige">
-        {isRealImage(product.imageUrl) ? (
-          // eslint-disable-next-line @next/next/no-img-element
+        <div className="relative aspect-square overflow-hidden bg-pearl-beige">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={product.imageUrl as string}
+            src={getProductImage(product)}
             alt={product.name}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            className="h-full w-full object-contain p-8 transition duration-500 group-hover:scale-105"
           />
-        ) : (
-          // Soft warm-toned placeholder with the product's first letter.
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-pearl-beige via-dusty-rose/30 to-golden-apricot/30">
-            <span className="font-display text-5xl font-medium text-burgundy/40">
-              {product.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        )}
-      </div>
+        </div>
 
       {/* Text area with generous, editorial spacing */}
       <div className="space-y-1.5 p-5">

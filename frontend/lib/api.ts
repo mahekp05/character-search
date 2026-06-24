@@ -19,6 +19,8 @@ export type Product = {
   imageUrl?: string | null;
   description?: string | null;
   tags?: string[];
+  size?: string | null;
+  rating?: number | null;
 };
 
 // Get every product. Used to fill the filter dropdowns on the homepage.
@@ -37,17 +39,22 @@ export async function searchProducts(query: string): Promise<Product[]> {
   return res.json();
 }
 
-// Filter products by optional category, color and max price.
-// We only add a query param if the user actually chose a value.
+// Filter products by optional category, color, size, max price and min rating.
+// We only add a query param if the user actually chose a value, so the
+// backend receives a clean URL containing just the active filters.
 export async function filterProducts(filters: {
   category?: string;
   color?: string;
+  size?: string;
   maxPrice?: string;
+  minRating?: string;
 }): Promise<Product[]> {
   const params = new URLSearchParams();
   if (filters.category) params.set("category", filters.category);
   if (filters.color) params.set("color", filters.color);
+  if (filters.size) params.set("size", filters.size);
   if (filters.maxPrice) params.set("maxPrice", filters.maxPrice);
+  if (filters.minRating) params.set("minRating", filters.minRating);
 
   const res = await fetch(`${API_URL}/api/products/filter?${params.toString()}`);
   if (!res.ok) throw new Error("Filtering failed");

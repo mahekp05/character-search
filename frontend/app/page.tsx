@@ -17,22 +17,34 @@ export default function HomePage() {
   // The products we are currently showing in the grid.
   const [products, setProducts] = useState<Product[]>([]);
 
-  // A full copy of every product, fetched once. We use it only to build
-  // the category/color dropdown options, so they don't shrink while filtering.
+  // A full copy of every product, fetched once when the page loads.
+  //
+  // Why fetch this separately? We need it ONLY to build the filter dropdown
+  // options (categories, colors, sizes). We deliberately do NOT use it to
+  // populate the product grid — the grid stays empty until the user searches
+  // or picks a filter (see the "Start exploring" welcome state below).
   const [allProducts, setAllProducts] = useState<Product[]>([]);
 
   // UI state for loading and errors.
-  const [loading, setLoading] = useState(true);
+  // Loading starts as false because we do NOT fetch the grid on first load.
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   // The values the user has typed/selected.
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("");
   const [color, setColor] = useState("");
+  const [size, setSize] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [minRating, setMinRating] = useState("");
+
+  // Is the user currently searching or filtering anything?
+  // When this is false we show the welcome/explore state instead of a grid.
+  const hasActiveQuery =
+    searchTerm.trim() || category || color || size || maxPrice || minRating;
 
   // Fetch every product once when the page first loads.
-  // This list feeds the filter dropdowns below.
+  // This list feeds the filter dropdowns below — nothing else.
   useEffect(() => {
     getAllProducts()
       .then(setAllProducts)
@@ -41,10 +53,23 @@ export default function HomePage() {
       });
   }, []);
 
-  // Re-fetch the product grid whenever the search term or any filter changes.
-  // We wrap it in a 300ms timer ("debounce") so we don't fire a request
+  // Fetch the product GRID whenever the search term or any filter changes.
+  //
+  // The grid is intentionally NOT loaded by default: the homepage should feel
+  // like a curated starting point, not a dump of every product. So we only
+  // fetch once the user has an active search/filter. If they clear everything,
+  // we empty the grid and fall back to the welcome state.
+  //
+  // We wrap the fetch in a 300ms timer ("debounce") so we don't fire a request
   // on every single keystroke while the user is typing.
   useEffect(() => {
+    // No active search or filter → show the welcome state, fetch nothing.
+    if (!hasActiveQuery) {
+      setProducts([]);
+      setLoading(false);
+      return;
+    }
+
     const timer = setTimeout(async () => {
       setLoading(true);
       setError("");
@@ -55,9 +80,14 @@ export default function HomePage() {
           // If there is a search term, use the search endpoint.
           result = await searchProducts(searchTerm.trim());
         } else {
-          // Otherwise use the filter endpoint. With no filters chosen,
-          // the backend simply returns all products.
-          result = await filterProducts({ category, color, maxPrice });
+          // Otherwise use the filter endpoint with whichever filters are set.
+          result = await filterProducts({
+            category,
+            color,
+            size,
+            maxPrice,
+            minRating,
+          });
         }
 
         setProducts(result);
@@ -71,9 +101,9 @@ export default function HomePage() {
 
     // If the user types again before 300ms, cancel the previous timer.
     return () => clearTimeout(timer);
-  }, [searchTerm, category, color, maxPrice]);
+  }, [searchTerm, category, color, size, maxPrice, minRating, hasActiveQuery]);
 
-  // Build the lists of unique categories and colors for the dropdowns.
+  // Build the lists of unique categories, colors and sizes for the dropdowns.
   // useMemo just means "only recalculate this when allProducts changes".
   const categoryOptions = useMemo(
     () => unique(allProducts.map((p) => p.category)),
@@ -83,13 +113,19 @@ export default function HomePage() {
     () => unique(allProducts.map((p) => p.color)),
     [allProducts]
   );
+  const sizeOptions = useMemo(
+    () => unique(allProducts.map((p) => p.size)),
+    [allProducts]
+  );
 
-  // Clear every filter and the search box.
+  // Clear every filter and the search box (returns to the welcome state).
   function clearAll() {
     setSearchTerm("");
     setCategory("");
     setColor("");
+    setSize("");
     setMaxPrice("");
+    setMinRating("");
   }
 
   // Shared styling for the filter <select> / <input> controls so they
@@ -165,6 +201,39 @@ export default function HomePage() {
           </select>
         </label>
 
+        {/* Size */}
+        <label className="flex flex-col text-sm font-medium text-charcoal/80">
+          Size
+          <select
+            value={size}
+            onChange={(e) => setSize(e.target.value)}
+            className={fieldClass}
+          >
+            <option value="">All</option>
+            {sizeOptions.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {/* Min rating */}
+        <label className="flex flex-col text-sm font-medium text-charcoal/80">
+          Min rating
+          <select
+            value={minRating}
+            onChange={(e) => setMinRating(e.target.value)}
+            className={fieldClass}
+          >
+            <option value="">All</option>
+            <option value="4">4+</option>
+            <option value="3">3+</option>
+            <option value="2">2+</option>
+            <option value="1">1+</option>
+          </select>
+        </label>
+
         {/* Max price */}
         <label className="flex flex-col text-sm font-medium text-charcoal/80">
           Max price
@@ -200,7 +269,7 @@ export default function HomePage() {
 
       {/* ---------- Results ---------- */}
 
-      {/* Loading state */}
+      {/* Loading state — only appears after the user searches or filters. */}
       {loading && (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {/* Show 8 soft "skeleton" cards while loading. */}
@@ -227,8 +296,20 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Empty state */}
-      {!loading && !error && products.length === 0 && (
+      {/* Welcome / explore state — shown when nothing is searched or filtered. */}
+      {!loading && !error && !hasActiveQuery && (
+        <div className="rounded-2xl bg-warm-cream p-16 text-center shadow-sm shadow-taupe/20">
+          <p className="font-display text-2xl font-medium text-charcoal">
+            Start exploring
+          </p>
+          <p className="mt-2 text-sm text-charcoal/60">
+            Search for a product or choose filters to discover pieces.
+          </p>
+        </div>
+      )}
+
+      {/* No-result state — only after an active search/filter returns nothing. */}
+      {!loading && !error && hasActiveQuery && products.length === 0 && (
         <div className="rounded-2xl bg-warm-cream p-16 text-center shadow-sm shadow-taupe/20">
           <p className="font-display text-2xl font-medium text-charcoal">
             Nothing here just yet
@@ -239,8 +320,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Product grid */}
-      {!loading && !error && products.length > 0 && (
+      {/* Product grid — only when an active query returned products. */}
+      {!loading && !error && hasActiveQuery && products.length > 0 && (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />

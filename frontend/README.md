@@ -175,6 +175,91 @@ Seed the database:
 npx ts-node prisma/seed.ts
 ```
 
+## Dataset
+
+This project currently uses the Fashion Products dataset from Kaggle.
+
+Dataset Information:
+
+* Source: Kaggle Fashion Products Dataset
+* Records: 1,000 fashion products
+* Brands: Adidas, Zara, H&M, Gucci, Nike, and others
+* Attributes:
+
+  * Product Name
+  * Brand
+  * Category
+  * Price
+  * Rating
+  * Color
+  * Size
+
+The dataset is imported into PostgreSQL through a custom TypeScript ingestion pipeline using Prisma ORM. This data powers search, filtering, and future recommendation features.
+
+## Current Features
+
+* PostgreSQL database integration
+* Prisma ORM configuration
+* Product data model
+* Database migrations
+* Fashion dataset ingestion pipeline
+* 1,000+ products stored in PostgreSQL
+* Product search API
+* Full-stack architecture connecting frontend, backend, and database
+
+## Database Model
+
+```prisma
+model Product {
+  id          String @id @default(uuid())
+  name        String
+  brand       String?
+  category    String?
+  color       String?
+  size        String?
+  price       Float?
+  rating      Float?
+  imageUrl    String?
+  description String?
+  tags        String[]
+}
+```
+
+## Planned Features
+
+### Search & Discovery
+
+* Keyword-based product search
+* Category filtering
+* Brand filtering
+* Color filtering
+* Price range filtering
+* Rating filtering
+* Size filtering
+* Search ranking improvements
+
+### Recommendations
+
+* Similar product recommendations
+* Collaborative filtering recommendations
+* Content-based recommendations
+* Personalized product discovery
+
+### AI Features
+
+* Semantic search using embeddings
+* Natural language product search
+* AI-powered fashion assistant
+* Outfit and style recommendations
+
+### Product Experience
+
+* Product detail pages
+* Saved or favorited products
+* Search analytics
+* User preference profiles
+
+
 ## Motivation
 
 Most shopping websites are built around known-item search, where users already know what they want. This project explores product discovery by allowing users to search through descriptions, tags, brands, colors, and categories, making the experience more flexible and exploratory.
